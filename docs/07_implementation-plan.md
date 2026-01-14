@@ -16,9 +16,9 @@ Better Auth サンプルアプリケーションの実装作業計画です。
 
 ### Phase 1: 環境構築
 
-- [ ] **1.1** Docker Compose で PostgreSQL 起動 → `docker-compose.yml`
-- [ ] **1.2** バックエンドプロジェクト作成 → `backend/Cargo.toml`
-- [ ] **1.3** フロントエンドプロジェクト作成 → `frontend/package.json`
+- [x] **1.1** Docker Compose で PostgreSQL 起動 → `docker-compose.yml`
+- [x] **1.2** バックエンドプロジェクト作成 → `backend/Cargo.toml`
+- [x] **1.3** フロントエンドプロジェクト作成 → `frontend/package.json`
 
 ### Phase 2: データベース（SeaORM マイグレーション）
 
