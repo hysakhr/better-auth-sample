@@ -33,12 +33,12 @@ Better Auth サンプルアプリケーションの実装作業計画です。
 
 ### Phase 3: フロントエンド認証（Better Auth）
 
-- [ ] **3.1** 依存パッケージインストール → `package.json`
-- [ ] **3.2** Drizzle DB 設定 → `src/lib/db.ts`
-- [ ] **3.3** Drizzle スキーマ定義 → `src/db/schema.ts`
-- [ ] **3.4** Better Auth サーバー設定 → `src/lib/auth.ts`
-- [ ] **3.5** Better Auth クライアント設定 → `src/lib/auth-client.ts`
-- [ ] **3.6** 認証 API Route → `src/app/api/auth/[...all]/route.ts`
+- [x] **3.1** 依存パッケージインストール → `package.json`
+- [x] **3.2** Drizzle DB 設定 → `src/lib/db.ts`
+- [x] **3.3** Drizzle スキーマ定義 → `src/db/schema.ts`
+- [x] **3.4** Better Auth サーバー設定 → `src/lib/auth.ts`
+- [x] **3.5** Better Auth クライアント設定 → `src/lib/auth-client.ts`
+- [x] **3.6** 認証 API Route → `src/app/api/auth/[...all]/route.ts`
 
 ### Phase 4: 認証 UI
 
