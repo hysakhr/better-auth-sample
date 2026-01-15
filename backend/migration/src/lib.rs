@@ -4,7 +4,6 @@ mod m20240101_000001_create_users_table;
 mod m20240101_000002_create_sessions_table;
 mod m20240101_000003_create_accounts_table;
 mod m20240101_000004_create_verifications_table;
-mod m20240101_000005_create_posts_table;
 
 pub struct Migrator;
 
@@ -16,7 +15,6 @@ impl MigratorTrait for Migrator {
             Box::new(m20240101_000002_create_sessions_table::Migration),
             Box::new(m20240101_000003_create_accounts_table::Migration),
             Box::new(m20240101_000004_create_verifications_table::Migration),
-            Box::new(m20240101_000005_create_posts_table::Migration),
         ]
     }
 }

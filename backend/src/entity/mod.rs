@@ -3,7 +3,6 @@
 pub mod prelude;
 
 pub mod accounts;
-pub mod posts;
 pub mod sessions;
 pub mod users;
 pub mod verifications;

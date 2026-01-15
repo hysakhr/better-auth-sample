@@ -21,12 +21,6 @@
 | `accounts` | 認証アカウント情報（OAuth + パスワード） |
 | `verifications` | メール検証・パスワードリセット |
 
-### ビジネステーブル（Axum 管理）
-
-| テーブル名 | 用途 |
-|------------|------|
-| `posts` | サンプル投稿データ |
-
 ## 3. 詳細スキーマ
 
 ### 3.1 users テーブル
@@ -170,31 +164,12 @@ CREATE INDEX idx_verifications_expires_at ON verifications(expires_at);
 | `created_at` | TIMESTAMP | 作成日時 |
 | `updated_at` | TIMESTAMP | 更新日時 |
 
-### 3.5 posts テーブル（サンプルビジネステーブル）
-
-```sql
-CREATE TABLE posts (
-    id SERIAL PRIMARY KEY,
-    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    title TEXT NOT NULL,
-    content TEXT NOT NULL,
-    published BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
--- インデックス
-CREATE INDEX idx_posts_user_id ON posts(user_id);
-CREATE INDEX idx_posts_published ON posts(published);
-```
-
 ## 4. ER図
 
 ```mermaid
 erDiagram
     users ||--o{ sessions : "has"
     users ||--o{ accounts : "has"
-    users ||--o{ posts : "has"
 
     users {
         text id PK
@@ -230,16 +205,6 @@ erDiagram
         text scope
         text id_token
         text password
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    posts {
-        serial id PK
-        text user_id FK
-        text title
-        text content
-        boolean published
         timestamp created_at
         timestamp updated_at
     }
@@ -307,8 +272,7 @@ backend/
         ├── m20240101_000001_create_users_table.rs
         ├── m20240101_000002_create_sessions_table.rs
         ├── m20240101_000003_create_accounts_table.rs
-        ├── m20240101_000004_create_verifications_table.rs
-        └── m20240101_000005_create_posts_table.rs
+        └── m20240101_000004_create_verifications_table.rs
 ```
 
 ### マイグレーションコマンド

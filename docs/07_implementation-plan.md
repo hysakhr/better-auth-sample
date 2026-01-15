@@ -27,9 +27,8 @@ Better Auth サンプルアプリケーションの実装作業計画です。
 - [x] **2.3** sessions テーブル作成 → `m20240101_000002_create_sessions_table.rs`
 - [x] **2.4** accounts テーブル作成 → `m20240101_000003_create_accounts_table.rs`
 - [x] **2.5** verifications テーブル作成 → `m20240101_000004_create_verifications_table.rs`
-- [x] **2.6** posts テーブル作成 → `m20240101_000005_create_posts_table.rs`
-- [x] **2.7** マイグレーション実行 → DB テーブル
-- [x] **2.8** SeaORM エンティティ生成 → `backend/src/entity/`
+- [x] **2.6** マイグレーション実行 → DB テーブル
+- [x] **2.7** SeaORM エンティティ生成 → `backend/src/entity/`
 
 ### Phase 3: フロントエンド認証（Better Auth）
 

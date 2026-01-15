@@ -273,37 +273,30 @@ pub async fn auth_middleware(
 
 ---
 
-#### GET /api/posts
-公開投稿一覧
+#### GET /api/greeting
+任意認証の挨拶 API（FromRequestParts パターン）
 
-**Query Parameters:**
-- `page` (optional): ページ番号（デフォルト: 1）
-- `limit` (optional): 1ページあたりの件数（デフォルト: 10）
-
-**Response:**
+**Response (認証済み):**
 ```json
 {
-  "data": [
-    {
-      "id": 1,
-      "title": "Hello World",
-      "content": "This is a sample post.",
-      "authorName": "田中太郎",
-      "createdAt": "2024-01-15T10:00:00.000Z"
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "limit": 10,
-    "total": 100,
-    "totalPages": 10
-  }
+  "message": "こんにちは、田中太郎さん！",
+  "user_name": "田中太郎",
+  "is_logged_in": true
+}
+```
+
+**Response (未認証):**
+```json
+{
+  "message": "こんにちは、ゲストさん！",
+  "user_name": null,
+  "is_logged_in": false
 }
 ```
 
 ---
 
-### 3.3 認証必須API
+### 3.3 認証必須API（middleware パターン）
 
 #### GET /api/me
 現在のユーザー情報
@@ -338,127 +331,21 @@ Cookie: better-auth.session_token=...
 
 ---
 
-#### GET /api/my/posts
-自分の投稿一覧
-
-**Request Headers:**
-```
-Cookie: better-auth.session_token=...
-```
-
-**Response:**
-```json
-{
-  "data": [
-    {
-      "id": 1,
-      "title": "My First Post",
-      "content": "This is my post.",
-      "published": false,
-      "createdAt": "2024-01-15T10:00:00.000Z",
-      "updatedAt": "2024-01-15T10:00:00.000Z"
-    }
-  ]
-}
-```
-
----
-
-#### POST /api/my/posts
-投稿作成
-
-**Request Headers:**
-```
-Cookie: better-auth.session_token=...
-Content-Type: application/json
-```
-
-**Request Body:**
-```json
-{
-  "title": "New Post",
-  "content": "This is new content.",
-  "published": false
-}
-```
-
-**Response:**
-```json
-{
-  "id": 2,
-  "title": "New Post",
-  "content": "This is new content.",
-  "published": false,
-  "createdAt": "2024-01-15T11:00:00.000Z",
-  "updatedAt": "2024-01-15T11:00:00.000Z"
-}
-```
-**Status:** 201
-
----
-
-#### PUT /api/my/posts/:id
-投稿更新
-
-**Request Headers:**
-```
-Cookie: better-auth.session_token=...
-Content-Type: application/json
-```
-
-**Request Body:**
-```json
-{
-  "title": "Updated Title",
-  "content": "Updated content.",
-  "published": true
-}
-```
-
-**Response:**
-```json
-{
-  "id": 2,
-  "title": "Updated Title",
-  "content": "Updated content.",
-  "published": true,
-  "createdAt": "2024-01-15T11:00:00.000Z",
-  "updatedAt": "2024-01-15T12:00:00.000Z"
-}
-```
-
----
-
-#### DELETE /api/my/posts/:id
-投稿削除
-
-**Request Headers:**
-```
-Cookie: better-auth.session_token=...
-```
-
-**Response:**
-```json
-{
-  "success": true
-}
-```
-**Status:** 200
-
----
-
 ## 4. CORS 設定
 
 Axum バックエンドでは、Next.js からの API 呼び出しを許可するために CORS を設定します。
 
+**注意:** `allow_credentials(true)` を使用する場合、`allow_headers(Any)` は使用できません。明示的にヘッダーを指定する必要があります。
+
 ```rust
 // main.rs
-use tower_http::cors::{CorsLayer, Any};
+use axum::http::{header, Method};
+use tower_http::cors::CorsLayer;
 
 let cors = CorsLayer::new()
-    .allow_origin("http://localhost:3050".parse::<HeaderValue>().unwrap())
-    .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
-    .allow_headers(Any)
+    .allow_origin(frontend_url.parse::<HeaderValue>().unwrap())
+    .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
+    .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION, header::COOKIE])
     .allow_credentials(true);  // Cookie を許可
 
 let app = Router::new()
@@ -481,26 +368,6 @@ const response = await fetch(
 );
 
 const data = await response.json();
-```
-
-### POST リクエストの例
-
-```typescript
-const response = await fetch(
-  `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/my/posts`,
-  {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      title: "New Post",
-      content: "This is new content.",
-      published: false,
-    }),
-  }
-);
 ```
 
 ## 6. エラーレスポンス形式

@@ -3,7 +3,6 @@ import {
   text,
   boolean,
   timestamp,
-  integer,
   unique,
 } from "drizzle-orm/pg-core";
 
@@ -66,15 +65,3 @@ export const verification = pgTable("verifications", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
-// posts テーブル（ビジネステーブル）
-export const posts = pgTable("posts", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  published: boolean("published").default(false).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});

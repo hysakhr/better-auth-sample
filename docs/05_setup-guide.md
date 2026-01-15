@@ -118,7 +118,6 @@ sea-orm-cli migrate generate create_users_table
 sea-orm-cli migrate generate create_sessions_table
 sea-orm-cli migrate generate create_accounts_table
 sea-orm-cli migrate generate create_verifications_table
-sea-orm-cli migrate generate create_posts_table
 ```
 
 ### 4.5 マイグレーション実行
