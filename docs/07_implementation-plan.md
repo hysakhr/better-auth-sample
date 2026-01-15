@@ -51,9 +51,8 @@ Better Auth サンプルアプリケーションの実装作業計画です。
 
 ### Phase 5: 保護ページ
 
-- [x] **5.1** ダッシュボードページ → `src/app/(protected)/dashboard/page.tsx`
-- [x] **5.2** プロフィールページ → `src/app/(protected)/profile/page.tsx`
-- [x] **5.3** 認証ガード（レイアウト） → `src/app/(protected)/layout.tsx`
+- [x] **5.1** プロフィールページ → `src/app/(protected)/profile/page.tsx`
+- [x] **5.2** 認証ガード（レイアウト） → `src/app/(protected)/layout.tsx`
 
 ### Phase 6: 退会機能
 
@@ -72,7 +71,8 @@ Better Auth サンプルアプリケーションの実装作業計画です。
 
 ### Phase 8: API 動作確認ページ
 
-- [ ] **8.1** API テストページ → `src/app/(protected)/api-test/page.tsx`
+- [x] **8.1** API テストページ → `src/app/(protected)/api-test/page.tsx`
+- [x] **8.2** トップページ更新 → `src/app/page.tsx`（認証状態に応じた表示）
 
 ### Phase 9: メール設定（Resend）
 
