@@ -42,24 +42,24 @@ Better Auth サンプルアプリケーションの実装作業計画です。
 
 ### Phase 4: 認証 UI
 
-- [ ] **4.1** ログインページ → `src/app/(auth)/login/page.tsx`
-- [ ] **4.2** 会員登録ページ → `src/app/(auth)/register/page.tsx`
-- [ ] **4.3** メール認証完了ページ → `src/app/(auth)/verify-email/page.tsx`
-- [ ] **4.4** ログインフォーム → `src/components/auth/LoginForm.tsx`
-- [ ] **4.5** 会員登録フォーム → `src/components/auth/RegisterForm.tsx`
-- [ ] **4.6** Google ログインボタン → `src/components/auth/SocialButtons.tsx`
+- [x] **4.1** ログインページ → `src/app/(auth)/login/page.tsx`
+- [x] **4.2** 会員登録ページ → `src/app/(auth)/register/page.tsx`
+- [x] **4.3** メール認証完了ページ → `src/app/(auth)/verify-email/page.tsx`
+- [x] **4.4** ログインフォーム → `src/components/auth/LoginForm.tsx`
+- [x] **4.5** 会員登録フォーム → `src/components/auth/RegisterForm.tsx`
+- [x] **4.6** Google ログインボタン → `src/components/auth/SocialButtons.tsx`
 
 ### Phase 5: 保護ページ
 
-- [ ] **5.1** ダッシュボードページ → `src/app/(protected)/dashboard/page.tsx`
-- [ ] **5.2** プロフィールページ → `src/app/(protected)/profile/page.tsx`
-- [ ] **5.3** 認証ガード（レイアウト） → `src/app/(protected)/layout.tsx`
+- [x] **5.1** ダッシュボードページ → `src/app/(protected)/dashboard/page.tsx`
+- [x] **5.2** プロフィールページ → `src/app/(protected)/profile/page.tsx`
+- [x] **5.3** 認証ガード（レイアウト） → `src/app/(protected)/layout.tsx`
 
 ### Phase 6: 退会機能
 
-- [ ] **6.1** 退会 API Route → `src/app/api/user/withdraw/route.ts`
-- [ ] **6.2** 退会確認コンポーネント → `src/components/auth/WithdrawButton.tsx`
-- [ ] **6.3** 設定ページに退会ボタン追加 → `src/app/(protected)/settings/page.tsx`
+- [x] **6.1** 退会 API Route → `src/app/api/user/withdraw/route.ts`
+- [x] **6.2** 退会確認コンポーネント → `src/components/auth/WithdrawButton.tsx`
+- [x] **6.3** 設定ページに退会ボタン追加 → `src/app/(protected)/settings/page.tsx`
 
 ### Phase 7: バックエンド（Axum）
 
