@@ -7,8 +7,8 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 
-// users テーブル
-export const users = pgTable("users", {
+// user テーブル（Better Auth は単数形を期待）
+export const user = pgTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
@@ -19,12 +19,12 @@ export const users = pgTable("users", {
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
 
-// sessions テーブル
-export const sessions = pgTable("sessions", {
+// session テーブル（Better Auth は単数形を期待）
+export const session = pgTable("sessions", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .references(() => user.id, { onDelete: "cascade" }),
   token: text("token").notNull().unique(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   ipAddress: text("ip_address"),
@@ -33,14 +33,14 @@ export const sessions = pgTable("sessions", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
-// accounts テーブル
-export const accounts = pgTable(
+// account テーブル（Better Auth は単数形を期待）
+export const account = pgTable(
   "accounts",
   {
     id: text("id").primaryKey(),
     userId: text("user_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => user.id, { onDelete: "cascade" }),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
     accessToken: text("access_token"),
@@ -56,8 +56,8 @@ export const accounts = pgTable(
   (table) => [unique().on(table.providerId, table.accountId)]
 );
 
-// verifications テーブル
-export const verifications = pgTable("verifications", {
+// verification テーブル（Better Auth は単数形を期待）
+export const verification = pgTable("verifications", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
@@ -71,7 +71,7 @@ export const posts = pgTable("posts", {
   id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   userId: text("user_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .references(() => user.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   content: text("content").notNull(),
   published: boolean("published").default(false).notNull(),
