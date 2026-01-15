@@ -63,11 +63,12 @@ Better Auth サンプルアプリケーションの実装作業計画です。
 
 ### Phase 7: バックエンド（Axum）
 
-- [ ] **7.1** Axum プロジェクト構成 → `src/main.rs`, `src/lib.rs`
-- [ ] **7.2** 認証ミドルウェア → `src/middleware/auth.rs`
-- [ ] **7.3** 公開 API（ヘルスチェック等） → `src/routes/public.rs`
-- [ ] **7.4** 認証必須 API（/api/me 等） → `src/routes/protected.rs`
-- [ ] **7.5** CORS 設定 → `src/main.rs`
+- [x] **7.1** Axum プロジェクト構成 → `src/main.rs`, `src/lib.rs`
+- [x] **7.2** 認証ミドルウェア → `src/middleware/auth.rs`
+- [x] **7.3** 公開 API（ヘルスチェック等） → `src/routes/public.rs`
+- [x] **7.4** 認証必須 API（/api/me 等） → `src/routes/protected.rs`
+- [x] **7.5** CORS 設定 → `src/main.rs`
+- [x] **7.6** 任意認証 API（/api/greeting） → `src/routes/public.rs`（折衷アプローチのサンプル）
 
 ### Phase 8: API 動作確認ページ
 

@@ -3,7 +3,8 @@ use std::net::SocketAddr;
 
 use axum::Router;
 use sea_orm::Database;
-use tower_http::cors::{Any, CorsLayer};
+use axum::http::{header, Method};
+use tower_http::cors::CorsLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod entity;
@@ -41,13 +42,13 @@ async fn main() {
     let frontend_url = env::var("FRONTEND_URL").unwrap_or_else(|_| "http://localhost:3050".into());
     let cors = CorsLayer::new()
         .allow_origin(frontend_url.parse::<axum::http::HeaderValue>().unwrap())
-        .allow_methods(Any)
-        .allow_headers(Any)
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
+        .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION, header::COOKIE])
         .allow_credentials(true);
 
     // ルーター構築
     let app = Router::new()
-        .nest("/api", routes::routes())
+        .nest("/api", routes::routes(state.clone()))
         .layer(cors)
         .with_state(state);
 
