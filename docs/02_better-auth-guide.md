@@ -65,16 +65,10 @@ export const auth = betterAuth({
     provider: "pg", // PostgreSQL
   }),
 
-  // メール/パスワード認証を有効化
-  emailAndPassword: {
-    enabled: true,
-    // パスワード要件（デフォルト: 最小8文字、最大128文字）
-    minPasswordLength: 8,
-    maxPasswordLength: 128,
-    // メール認証を必須にする
-    requireEmailVerification: true,
-    // 認証メール送信処理
-    sendVerificationEmail: async ({ user, url, token }, request) => {
+  // メール認証設定（トップレベルで設定）
+  emailVerification: {
+    sendOnSignUp: true, // 会員登録時に自動送信
+    sendVerificationEmail: async ({ user, url }: { user: { email: string; name: string }; url: string }) => {
       // 実際のメール送信処理（Resend, SendGrid, Nodemailer 等を使用）
       await sendEmail({
         to: user.email,
@@ -87,8 +81,15 @@ export const auth = betterAuth({
         `,
       });
     },
+  },
+
+  // メール/パスワード認証を有効化
+  emailAndPassword: {
+    enabled: true,
+    // メール認証を必須にする
+    requireEmailVerification: true,
     // パスワードリセットメール送信処理
-    sendResetPassword: async ({ user, url, token }, request) => {
+    sendResetPassword: async ({ user, url }: { user: { email: string; name: string }; url: string }) => {
       await sendEmail({
         to: user.email,
         subject: "パスワードのリセット",

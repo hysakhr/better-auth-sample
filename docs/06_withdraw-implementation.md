@@ -29,7 +29,7 @@ accounts:
 退会後:
 users:
   id: "user_123"
-  name: "Deleted User"
+  name: "退会済みユーザー"
   email: "deleted_user_123@deleted.local"  // 匿名化（元のメールアドレスは解放）
   deleted_at: "2024-01-15T10:00:00.000Z"
 
@@ -61,7 +61,7 @@ accounts:
 退会後:
 users:
   id: "user_456"
-  name: "Deleted User"
+  name: "退会済みユーザー"
   email: "deleted_user_456@deleted.local"
   deleted_at: "2024-01-15T10:00:00.000Z"
 
@@ -80,107 +80,61 @@ sessions: (削除)
 
 ```typescript
 // src/app/api/user/withdraw/route.ts
+import { headers } from "next/headers";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { users, sessions, accounts } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
-import { headers, cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { user, session, account } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
-export async function POST(request: Request) {
+export const dynamic = "force-dynamic";
+
+export async function POST() {
   try {
-    // 1. セッション取得
-    const session = await auth.api.getSession({
+    // セッションからユーザー情報を取得
+    const currentSession = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (!session) {
+    if (!currentSession) {
       return NextResponse.json(
-        { error: { message: "認証が必要です", code: "UNAUTHORIZED" } },
+        { error: "認証が必要です" },
         { status: 401 }
       );
     }
 
-    const userId = session.user.id;
+    const userId = currentSession.user.id;
 
-    // 2. ユーザーの認証方式を確認
-    const userAccounts = await db
-      .select()
-      .from(accounts)
-      .where(eq(accounts.userId, userId));
-
-    const isGoogleUser = userAccounts.some(
-      (acc) => acc.providerId === "google"
-    );
-    const isCredentialUser = userAccounts.some(
-      (acc) => acc.providerId === "credential"
-    );
-
-    // 3. パスワード検証（メール/パスワードユーザーのみ）
-    if (isCredentialUser) {
-      const body = await request.json();
-      const { confirmPassword } = body;
-
-      if (!confirmPassword) {
-        return NextResponse.json(
-          { error: { message: "パスワードを入力してください", code: "VALIDATION_ERROR" } },
-          { status: 400 }
-        );
-      }
-
-      // Better Auth の signIn.email を使ってパスワードを検証
-      // 退会前に再認証することでパスワードの正当性を確認
-      const verifyResult = await auth.api.signInEmail({
-        body: {
-          email: session.user.email,
-          password: confirmPassword,
-        },
-      });
-
-      if (!verifyResult) {
-        return NextResponse.json(
-          { error: { message: "パスワードが正しくありません", code: "INVALID_PASSWORD" } },
-          { status: 400 }
-        );
-      }
-    }
-
-    // 4. ユーザー情報をソフトデリート
+    // ソフトデリート: メール・名前を匿名化し、deletedAt を設定
     const anonymizedEmail = `deleted_${userId}@deleted.local`;
+    const anonymizedName = "退会済みユーザー";
 
     await db
-      .update(users)
+      .update(user)
       .set({
-        deletedAt: new Date(),
         email: anonymizedEmail,
-        name: "Deleted User",
+        name: anonymizedName,
+        image: null,
+        deletedAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(users.id, userId));
+      .where(eq(user.id, userId));
 
-    // 5. セッション削除
-    await db.delete(sessions).where(eq(sessions.userId, userId));
+    // セッションを削除（ログアウト）
+    await db.delete(session).where(eq(session.userId, userId));
 
-    // 6. アカウント削除（全ユーザー共通）
-    await db.delete(accounts).where(eq(accounts.userId, userId));
+    // アカウント情報を削除（OAuth連携解除）
+    await db.delete(account).where(eq(account.userId, userId));
 
-    // 7. Cookie 削除
-    const cookieStore = await cookies();
-    cookieStore.delete("better-auth.session_token");
-
-    return NextResponse.json({
-      success: true,
-      message: "退会処理が完了しました",
-    });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Withdraw error:", error);
     return NextResponse.json(
-      { error: { message: "退会処理中にエラーが発生しました", code: "INTERNAL_ERROR" } },
+      { error: "退会処理に失敗しました" },
       { status: 500 }
     );
   }
 }
-
 ```
 
 ### 3.2 退会確認コンポーネント
@@ -190,108 +144,73 @@ export async function POST(request: Request) {
 "use client";
 
 import { useState } from "react";
-import { useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 export function WithdrawButton() {
-  const { data: session } = useSession();
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [isConfirming, setIsConfirming] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Google ユーザーかどうかを判定（実際にはバックエンドで判定すべき）
-  const isGoogleUser = session?.user?.image?.includes("googleusercontent");
+  const [error, setError] = useState<string | null>(null);
 
   const handleWithdraw = async () => {
     setIsLoading(true);
-    setError("");
+    setError(null);
 
     try {
       const response = await fetch("/api/user/withdraw", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(
-          isGoogleUser ? {} : { confirmPassword: password }
-        ),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        setError(data.error?.message || "退会処理に失敗しました");
-        return;
+        const data = await response.json();
+        throw new Error(data.error || "退会処理に失敗しました");
       }
 
-      // 成功時はトップページへリダイレクト
-      router.push("/?withdrawn=true");
+      // 退会成功後、ログインページへリダイレクト
+      router.push("/login");
+      router.refresh();
     } catch (err) {
-      setError("退会処理中にエラーが発生しました");
-    } finally {
+      setError(err instanceof Error ? err.message : "退会処理に失敗しました");
       setIsLoading(false);
     }
   };
 
-  return (
-    <>
+  if (!isConfirming) {
+    return (
       <button
-        onClick={() => setIsOpen(true)}
-        className="text-red-600 hover:text-red-800"
+        onClick={() => setIsConfirming(true)}
+        className="text-red-600 hover:text-red-800 text-sm"
       >
         退会する
       </button>
+    );
+  }
 
-      {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">退会確認</h2>
-
-            <p className="mb-4 text-gray-600">
-              本当に退会しますか？この操作は取り消せません。
-            </p>
-
-            {!isGoogleUser && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">
-                  確認のためパスワードを入力してください
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border rounded px-3 py-2"
-                  placeholder="パスワード"
-                />
-              </div>
-            )}
-
-            {error && (
-              <p className="text-red-600 text-sm mb-4">{error}</p>
-            )}
-
-            <div className="flex gap-4">
-              <button
-                onClick={() => setIsOpen(false)}
-                className="flex-1 px-4 py-2 border rounded"
-                disabled={isLoading}
-              >
-                キャンセル
-              </button>
-              <button
-                onClick={handleWithdraw}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded"
-                disabled={isLoading || (!isGoogleUser && !password)}
-              >
-                {isLoading ? "処理中..." : "退会する"}
-              </button>
-            </div>
-          </div>
-        </div>
+  return (
+    <div className="border border-red-200 rounded-lg p-4 bg-red-50">
+      <p className="text-sm text-red-800 mb-4">
+        本当に退会しますか？この操作は取り消せません。
+      </p>
+      {error && (
+        <p className="text-sm text-red-600 mb-4">{error}</p>
       )}
-    </>
+      <div className="flex space-x-3">
+        <button
+          onClick={handleWithdraw}
+          disabled={isLoading}
+          className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "処理中..." : "退会を確定する"}
+        </button>
+        <button
+          onClick={() => setIsConfirming(false)}
+          disabled={isLoading}
+          className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 disabled:opacity-50"
+        >
+          キャンセル
+        </button>
+      </div>
+    </div>
   );
 }
 ```
@@ -358,7 +277,7 @@ pub struct AuthUser(pub users::Model);
 
 ## 5. 注意事項
 
-1. **パスワード検証**: Better Auth の `signInEmail` API を使用して検証（内部実装に依存しない）
+1. **シンプルな退会処理**: 現在の実装はパスワード検証なしのシンプルな退会処理。本番環境ではパスワード再入力による確認を追加することを推奨
 2. **トランザクション**: 本番環境ではトランザクションを使用して一貫性を保証
 3. **GDPR 対応**: 必要に応じて完全削除オプションも検討
 4. **再入会制限**: 悪用防止のため、再入会回数や期間の制限を検討

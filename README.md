@@ -1,114 +1,185 @@
-# Better Auth サンプルアプリケーション
+# Better Auth Sample
 
-Better Auth 利用に向けた学習用サンプルアプリケーションです。
+[Better Auth](https://www.better-auth.com/) を使った認証機能の実装サンプルです。Next.js (App Router) + Axum (Rust) の構成で、実践的な認証フローを学習できます。
 
-## 構成
+## Features
 
-| レイヤー | 技術 |
-|----------|------|
-| フロントエンド | Next.js 16 (App Router) |
-| 認証 | Better Auth + Drizzle Adapter |
-| バックエンド | Axum + SeaORM |
-| データベース | PostgreSQL 16 |
+- **Email/Password 認証** - 会員登録・ログイン
+- **メール認証** - Resend によるメールアドレス確認
+- **パスワードリセット** - メール経由でのパスワード再設定
+- **Google OAuth** - ソーシャルログイン
+- **セッション管理** - Cookie ベースの認証
+- **バックエンド認証** - Axum での Cookie 検証
+- **退会機能** - ソフトデリート + 再登録可能
 
-## 機能一覧
+## Tech Stack
 
-- [x] メールアドレス/パスワードによる会員登録・ログイン
-- [x] メール認証（メールアドレスの存在確認）
-- [x] Google OAuth による会員登録・ログイン
-- [x] Cookie ベースのセッション管理
-- [x] バックエンド側での Cookie 認証検証
-- [x] ユーザー退会（ソフトデリート + 再入会可能）
-- [x] 認証・非認証 API の実装
-- [x] API 動作確認ページ
+| Layer | Technology |
+|-------|------------|
+| Frontend | Next.js 16 (App Router) |
+| Auth | Better Auth + Drizzle Adapter |
+| Backend | Axum + SeaORM |
+| Database | PostgreSQL 16 |
+| Email | Resend |
 
-## ドキュメント
+## Quick Start
 
-| ドキュメント | 内容 |
-|-------------|------|
-| [01_architecture.md](docs/01_architecture.md) | システムアーキテクチャ設計 |
-| [02_better-auth-guide.md](docs/02_better-auth-guide.md) | Better Auth 設定・実装ガイド |
-| [03_database-schema.md](docs/03_database-schema.md) | データベーススキーマ設計 |
-| [04_api-specification.md](docs/04_api-specification.md) | API 仕様書 |
-| [05_setup-guide.md](docs/05_setup-guide.md) | 環境構築手順 |
-| [06_withdraw-implementation.md](docs/06_withdraw-implementation.md) | 退会機能実装ガイド |
+### Prerequisites
 
-## クイックスタート
+- Node.js 20+
+- pnpm
+- Rust (stable)
+- Docker
+
+### 1. Start Database
 
 ```bash
-# 1. PostgreSQL 起動
 docker-compose up -d
+```
 
-# 2. バックエンドセットアップ
+### 2. Setup Backend
+
+```bash
 cd backend
+cp .env.example .env
 sea-orm-cli migrate up
 cargo run
+```
 
-# 3. フロントエンドセットアップ（別ターミナル）
+### 3. Setup Frontend
+
+```bash
 cd frontend
+cp .env.example .env.local
+# Edit .env.local with your credentials
 pnpm install
 pnpm dev
 ```
 
-## ディレクトリ構成
+### 4. Access
+
+- Frontend: http://localhost:3050
+- Backend API: http://localhost:3051
+
+## Project Structure
 
 ```
 better-auth-sample/
-├── frontend/          # Next.js アプリケーション
+├── frontend/                 # Next.js App
 │   ├── src/
-│   │   ├── app/       # App Router ページ
-│   │   ├── lib/       # 設定ファイル（auth, db）
-│   │   ├── db/        # Drizzle スキーマ
-│   │   └── components/
+│   │   ├── app/
+│   │   │   ├── (auth)/       # Auth pages (login, register, etc.)
+│   │   │   ├── (protected)/  # Protected pages (profile, settings)
+│   │   │   └── api/          # API Routes
+│   │   ├── components/auth/  # Auth components
+│   │   ├── lib/              # Auth & DB config
+│   │   └── db/               # Drizzle schema
 │   └── ...
-├── backend/           # Axum アプリケーション
+├── backend/                  # Axum App
 │   ├── src/
-│   │   ├── routes/    # API ルート
-│   │   ├── middleware/# 認証ミドルウェア
-│   │   └── entity/    # SeaORM エンティティ
-│   └── migration/     # SeaORM マイグレーション
-├── docs/              # ドキュメント
+│   │   ├── routes/           # API routes
+│   │   ├── middleware/       # Auth middleware
+│   │   └── entity/           # SeaORM entities
+│   └── migration/            # Database migrations
+├── docs/                     # Documentation
 └── docker-compose.yml
 ```
 
-## 認証フロー概要
+## Auth Flow
 
 ```mermaid
 sequenceDiagram
-    participant Browser as ブラウザ
-    participant NextJS as Next.js
-    participant Axum as Axum Backend
-    participant DB as PostgreSQL
+    participant Browser
+    participant Next.js
+    participant Axum
+    participant PostgreSQL
 
-    Browser->>NextJS: 1. ログイン
-    NextJS->>DB: ユーザー認証・セッション作成
-    NextJS-->>Browser: 2. Cookie設定 (better-auth.session_token)
-    Browser->>Axum: 3. API リクエスト (Cookie 自動送信)
-    Axum->>DB: 4. sessions テーブルで検証
-    DB-->>Axum: セッション情報
-    Axum-->>Browser: 5. レスポンス
+    Browser->>Next.js: 1. Login Request
+    Next.js->>PostgreSQL: Verify & Create Session
+    Next.js-->>Browser: 2. Set Cookie (better-auth.session_token)
+    Browser->>Axum: 3. API Request (Cookie auto-sent)
+    Axum->>PostgreSQL: 4. Verify Session
+    PostgreSQL-->>Axum: Session Data
+    Axum-->>Browser: 5. Response
 ```
 
-## 環境変数
+## Environment Variables
 
-### フロントエンド (.env.local)
+### Frontend (.env.local)
 
 ```env
-BETTER_AUTH_SECRET=your-secret-key-at-least-32-characters
+# Better Auth
+BETTER_AUTH_SECRET=your-secret-key-at-least-32-characters-long
 BETTER_AUTH_URL=http://localhost:3050
+
+# Database
 DATABASE_URL=postgresql://postgres:postgres@localhost:5555/better_auth_sample
+
+# Google OAuth
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# Resend (Email)
+RESEND_API_KEY=re_xxxxxxxxxxxx
+EMAIL_FROM=noreply@yourdomain.com
+
+# URLs
+NEXT_PUBLIC_APP_URL=http://localhost:3050
+NEXT_PUBLIC_BACKEND_URL=http://localhost:3051
 ```
 
-### バックエンド (.env)
+### Backend (.env)
 
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5555/better_auth_sample
+RUST_LOG=debug
 SERVER_PORT=3051
 FRONTEND_URL=http://localhost:3050
 ```
 
-## ライセンス
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Architecture](docs/01_architecture.md) | System architecture design |
+| [Better Auth Guide](docs/02_better-auth-guide.md) | Better Auth configuration guide |
+| [Database Schema](docs/03_database-schema.md) | Database schema design |
+| [API Specification](docs/04_api-specification.md) | API documentation |
+| [Setup Guide](docs/05_setup-guide.md) | Environment setup instructions |
+| [Withdraw Implementation](docs/06_withdraw-implementation.md) | Account deletion guide |
+
+## API Endpoints
+
+### Next.js (Port 3050)
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/auth/sign-up/email` | Email registration |
+| `POST /api/auth/sign-in/email` | Email login |
+| `POST /api/auth/sign-in/social` | Google OAuth |
+| `GET /api/auth/session` | Get current session |
+| `POST /api/auth/sign-out` | Logout |
+| `POST /api/user/withdraw` | Account deletion |
+
+### Axum (Port 3051)
+
+| Endpoint | Auth | Description |
+|----------|------|-------------|
+| `GET /api/health` | - | Health check |
+| `GET /api/greeting` | Optional | Greeting (changes by auth status) |
+| `GET /api/me` | Required | Current user info |
+
+## Screenshots
+
+### Login Page
+Email/Password login with Google OAuth option.
+
+### Profile Page
+User information display with email verification status.
+
+### Settings Page
+Account settings including account deletion.
+
+## License
 
 MIT
