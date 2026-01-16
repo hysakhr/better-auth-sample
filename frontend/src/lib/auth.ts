@@ -29,7 +29,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    sendResetPasswordEmail: async ({ user, url }: { user: { email: string; name: string }; url: string }) => {
+    sendResetPassword: async ({ user, url }: { user: { email: string; name: string }; url: string }) => {
       await resend.emails.send({
         from: process.env.EMAIL_FROM || "noreply@example.com",
         to: user.email,

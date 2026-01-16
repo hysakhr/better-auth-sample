@@ -24,6 +24,15 @@ export default function LoginPage() {
         <GoogleLoginButton />
         <SocialDivider />
         <LoginForm />
+
+        <div className="mt-4 text-center">
+          <Link
+            href="/forgot-password"
+            className="text-sm font-medium text-blue-600 hover:text-blue-500"
+          >
+            パスワードをお忘れの方
+          </Link>
+        </div>
       </div>
     </>
   );

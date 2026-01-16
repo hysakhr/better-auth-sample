@@ -78,6 +78,14 @@ Better Auth サンプルアプリケーションの実装作業計画です。
 
 - [x] **9.1** Resend 設定 → `src/lib/auth.ts`（emailVerification 追加）
 
+### Phase 10: パスワードリセット
+
+- [x] **10.1** パスワードリセット申請ページ → `src/app/(auth)/forgot-password/page.tsx`
+- [x] **10.2** パスワードリセット申請フォーム → `src/components/auth/ForgotPasswordForm.tsx`
+- [x] **10.3** パスワードリセット実行ページ → `src/app/(auth)/reset-password/page.tsx`
+- [x] **10.4** パスワードリセット実行フォーム → `src/components/auth/ResetPasswordForm.tsx`
+- [x] **10.5** ログインページにリンク追加
+
 ## 実装順序（推奨）
 
 ```
@@ -98,6 +106,8 @@ Phase 7 (Axum バックエンド)
 Phase 8 (API 動作確認)
     ↓
 Phase 9 (メール設定)
+    ↓
+Phase 10 (パスワードリセット)
 ```
 
 ## 環境変数
@@ -154,3 +164,8 @@ FRONTEND_URL=http://localhost:3050
 
 - [ ] 会員登録時に認証メールが届く
 - [ ] メール内リンクをクリックすると認証完了する
+
+### Phase 10 完了時
+
+- [ ] パスワードリセットメールが届く
+- [ ] メール内リンクから新パスワードを設定できる
