@@ -68,15 +68,15 @@ Better Auth サンプルアプリケーションの実装作業計画です。
 - [x] **7.5** CORS 設定 → `src/main.rs`
 - [x] **7.6** 任意認証 API（/api/greeting） → `src/routes/public.rs`（折衷アプローチのサンプル）
 
-### Phase 8: API 動作確認ページ
+### Phase 8: API 動作確認・UI 改善
 
-- [x] **8.1** API テストページ → `src/app/(protected)/api-test/page.tsx`
-- [x] **8.2** トップページ更新 → `src/app/page.tsx`（認証状態に応じた表示）
+- [x] **8.1** トップページに API テスト機能を統合 → `src/app/page.tsx`
+- [x] **8.2** ヘッダーにログアウトボタン追加
+- [x] **8.3** コンテンツ幅を統一（max-w-4xl）
 
 ### Phase 9: メール設定（Resend）
 
-- [ ] **9.1** Resend 設定 → `src/lib/auth.ts`（emailVerification 追加）
-- [ ] **9.2** メールテンプレート → `src/lib/email.ts`（オプション）
+- [x] **9.1** Resend 設定 → `src/lib/auth.ts`（emailVerification 追加）
 
 ## 実装順序（推奨）
 

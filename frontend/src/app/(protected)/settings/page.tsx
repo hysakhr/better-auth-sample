@@ -11,29 +11,24 @@ export default async function SettingsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-gray-900">
-                Home
-              </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/profile"
-                className="text-gray-600 hover:text-gray-900"
-              >
-                プロフィール
-              </Link>
-              <span className="text-gray-600">設定</span>
-            </div>
+        <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+          <Link href="/" className="text-xl font-bold text-gray-900">
+            Better Auth Sample
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/profile"
+              className="text-gray-600 hover:text-gray-900"
+            >
+              プロフィール
+            </Link>
+            <span className="text-gray-600">設定</span>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white shadow rounded-lg overflow-hidden">
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        <div className="bg-white shadow rounded-lg overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-medium text-gray-900">設定</h2>
             </div>
@@ -61,7 +56,6 @@ export default async function SettingsPage() {
               </div>
             </div>
           </div>
-        </div>
       </main>
     </div>
   );
