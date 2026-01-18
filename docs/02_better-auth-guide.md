@@ -714,3 +714,119 @@ npx @better-auth/cli@latest generate
 4. **Google OAuth エラー**
    - リダイレクト URI が正しく設定されているか確認
    - Google Cloud Console で認証情報を確認
+
+## 17. SDK を使わない直接 API 呼び出し（Raw API）
+
+Better Auth の認証 API は公開 REST API として提供されており、SDK（`better-auth/react`）を使わずに `fetch` で直接呼び出すことも可能です。Cookie ベースのセッション管理が可能なクライアントであれば、どの環境からでも認証できます。
+
+### 実装ファイル
+
+本プロジェクトでは、SDK を使わない認証画面を以下のファイルで実装しています。
+
+| ファイル | 説明 |
+|----------|------|
+| `app/(auth)/raw-login/page.tsx` | ログインページ |
+| `app/(auth)/raw-signup/page.tsx` | 会員登録ページ |
+| `components/auth/RawLoginForm.tsx` | fetch 版ログインフォーム |
+| `components/auth/RawSignupForm.tsx` | fetch 版会員登録フォーム |
+| `components/auth/BaseLoginForm.tsx` | ログインフォーム共通 UI |
+| `components/auth/BaseSignupForm.tsx` | 会員登録フォーム共通 UI |
+
+### SDK 版 vs Raw API 版の比較
+
+| 項目 | SDK 版 | Raw API 版 |
+|------|--------|-----------|
+| API 呼び出し | `signIn.email()` | `fetch("/api/auth/sign-in/email")` |
+| Cookie 管理 | SDK が自動処理 | `credentials: "include"` を明示 |
+| 型安全性 | SDK の型定義あり | 自前で型定義 |
+| 依存 | `better-auth/react` | なし（fetch のみ） |
+
+### 実装例（ログイン）
+
+```typescript
+const handleSubmit = async (data: { email: string; password: string }) => {
+  const response = await fetch("/api/auth/sign-in/email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",  // Cookie を受け取るために必須
+    body: JSON.stringify({
+      email: data.email,
+      password: data.password,
+    }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    return { success: false, error: result.error?.message };
+  }
+  return { success: true };
+};
+```
+
+**重要:** `credentials: "include"` を指定しないと、レスポンスの `Set-Cookie` ヘッダーがブラウザに反映されません。
+
+### 実装例（会員登録）
+
+```typescript
+const handleSubmit = async (data: { name: string; email: string; password: string }) => {
+  const response = await fetch("/api/auth/sign-up/email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    return { success: false, error: result.error?.message };
+  }
+  return { success: true };
+};
+```
+
+### 共通コンポーネント構造
+
+SDK 版と Raw API 版でフォーム UI を共通化するために、`BaseLoginForm` / `BaseSignupForm` コンポーネントを用意しています。
+
+```typescript
+// BaseLoginForm.tsx - 共通 UI
+type BaseLoginFormProps = {
+  onSubmit: (data: LoginData) => Promise<LoginResult>;
+};
+
+export function BaseLoginForm({ onSubmit }: BaseLoginFormProps) {
+  // フォーム UI（state, validation, JSX）を提供
+  // API 呼び出しロジックは onSubmit で注入
+}
+
+// LoginForm.tsx - SDK 版
+export function LoginForm() {
+  const handleSubmit = async (data) => {
+    const result = await signIn.email({ ... });  // SDK 使用
+    return result.error ? { success: false, error: result.error.message } : { success: true };
+  };
+  return <BaseLoginForm onSubmit={handleSubmit} />;
+}
+
+// RawLoginForm.tsx - Raw API 版
+export function RawLoginForm() {
+  const handleSubmit = async (data) => {
+    const response = await fetch("/api/auth/sign-in/email", { ... });  // fetch 使用
+    return !response.ok ? { success: false, error: result.error?.message } : { success: true };
+  };
+  return <BaseLoginForm onSubmit={handleSubmit} />;
+}
+```
+
+### ユースケース
+
+- **SDK に依存しないクライアント**: React 以外のフレームワーク（Vue, Svelte 等）からの認証
+- **モバイルアプリ**: iOS/Android アプリからの API 呼び出し
+- **学習目的**: Better Auth の認証フローを理解するため
+- **テスト**: API を直接叩いて動作確認したい場合
